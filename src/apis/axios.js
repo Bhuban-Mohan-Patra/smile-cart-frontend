@@ -1,8 +1,18 @@
-import { keysToCamelCase } from "@bigbinary/neeto-cist";
+import {
+  keysToCamelCase,
+  serializeKeysToSnakeCase,
+} from "@bigbinary/neeto-cist";
 import axios from "axios";
+import { evolve } from "ramda";
 
 const transformResponseKeysToCamelCase = response => {
   if (response.data) response.data = keysToCamelCase(response.data);
+};
+
+const requestInterceptors = () => {
+  axios.interceptors.request.use(
+    evolve({ data: serializeKeysToSnakeCase, params: serializeKeysToSnakeCase })
+  );
 };
 
 const responseInterceptors = () => {
@@ -25,4 +35,5 @@ export default function initializeAxios() {
     "https://smile-cart-backend-staging.neetodeployapp.com/";
   setHttpHeaders();
   responseInterceptors();
+  requestInterceptors();
 }
