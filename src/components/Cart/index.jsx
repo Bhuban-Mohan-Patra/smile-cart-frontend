@@ -13,7 +13,7 @@ import PriceCard from "./PriceCard";
 import ProductCard from "./ProductCard";
 
 const Cart = () => {
-  const { cartItems, setSelectedQuantity } = useCartItemsStore();
+  const { cartItems, setSelectedQuantity } = useCartItemsStore.pick();
   const slugs = keys(cartItems);
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
