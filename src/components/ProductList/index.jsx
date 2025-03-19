@@ -32,9 +32,11 @@ const ProductList = () => {
     page: Number(page) || DEFAULT_PAGE_INDEX,
     pageSize: Number(pageSize) || DEFAULT_PAGE_SIZE,
   };
+  console.log(productsParams);
 
   const { data: { products = [], totalProductsCount } = {}, isLoading } =
     useFetchProducts(productsParams);
+  console.log(products);
 
   const handlePageNavigation = page => {
     history.replace(
@@ -78,20 +80,22 @@ const ProductList = () => {
       {isEmpty(products) || !searchKey ? (
         <NoData className="h-full w-full" title={t("noData")} />
       ) : (
-        <div className="grid grid-cols-2 justify-items-center gap-y-8 p-4 md:grid-cols-3 lg:grid-cols-4">
-          {products.map(product => (
-            <ProductListItem key={product.slug} {...product} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-2 justify-items-center gap-y-8 p-4 md:grid-cols-3 lg:grid-cols-4">
+            {products.map(product => (
+              <ProductListItem key={product.slug} {...product} />
+            ))}
+          </div>
+          <div className="mb-5 self-end">
+            <Pagination
+              count={totalProductsCount}
+              navigate={handlePageNavigation}
+              pageNo={Number(page) || DEFAULT_PAGE_INDEX}
+              pageSize={Number(pageSize) || DEFAULT_PAGE_SIZE}
+            />
+          </div>
+        </>
       )}
-      <div className="mb-5 self-end">
-        <Pagination
-          count={totalProductsCount}
-          navigate={handlePageNavigation}
-          pageNo={Number(page) || DEFAULT_PAGE_INDEX}
-          pageSize={Number(pageSize) || DEFAULT_PAGE_SIZE}
-        />
-      </div>
     </div>
   );
 };
