@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import productsApi from "apis/products";
 import Header from "components/commons/Header";
+import { useFetchProducts } from "hooks/reactQuery/useProductsApi";
 import useDebounce from "hooks/useDebounce";
 import { Search } from "neetoicons";
 import { Spinner, Input, NoData } from "neetoui";
@@ -10,28 +10,33 @@ import { isEmpty, without } from "ramda";
 import ProductListItem from "./ProductListItem";
 
 const ProductList = () => {
-  const [products, setProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // const [products, setProducts] = useState([]);
+  // const [isLoading, setIsLoading] = useState(true);
   const [searchKey, setSearchKey] = useState("");
   const [cartItems, setCartItems] = useState([]);
   const debouncedSearchKey = useDebounce(searchKey);
 
-  const fetchProducts = async () => {
-    try {
-      const { products } = await productsApi.fetch({
-        searchTerm: debouncedSearchKey,
-      });
-      setProducts(products);
-    } catch (error) {
-      console.log("An error occurred:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { data: { products = [] } = {}, isLoading } = useFetchProducts({
+    searchTerm: debouncedSearchKey,
+  });
+  // console.log(data);
 
-  useEffect(() => {
-    fetchProducts();
-  }, [debouncedSearchKey]);
+  // const fetchProducts = async () => {
+  //   try {
+  //     const { products } = await productsApi.fetch({
+  //       searchTerm: debouncedSearchKey,
+  //     });
+  //     setProducts(products);
+  //   } catch (error) {
+  //     console.log("An error occurred:", error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchProducts();
+  // }, [debouncedSearchKey]);
 
   if (isLoading) {
     return (
@@ -64,7 +69,7 @@ const ProductList = () => {
           />
         }
       />
-      {isEmpty(products) ? (
+      {isEmpty(products) || !debouncedSearchKey ? (
         <NoData className="h-full w-full" title="No products to show" />
       ) : (
         <div className="grid grid-cols-2 justify-items-center gap-y-8 p-4 md:grid-cols-3 lg:grid-cols-4">
