@@ -1,3 +1,7 @@
 {
-  "helloWorld": "Hello World"
+  "buyNow": "Buy now",
+  "itemCount_one": "({{count}} item)",
+  "itemCount_other": "({{count}} items)",
+  "totalMrp": "Total MRP: <typography>${{mrp}}</typography>",
+  "offerPrice": "Total offer price: <span>${{offerPrice}}</span>"
 }
