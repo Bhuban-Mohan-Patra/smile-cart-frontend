@@ -9,8 +9,11 @@ import { useParams } from "react-router-dom";
 
 const Carousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+
   const { slug } = useParams();
+
   const timerRef = useRef(null);
+
   const { data: { imageUrl, imageUrls: partialImageUrls, title } = {} } =
     useShowProduct(slug);
 
@@ -20,7 +23,6 @@ const Carousel = () => {
     setCurrentIndex(prevIndex => (prevIndex + 1) % imageUrls.length);
 
   const resetTimer = () => {
-    console.log("reset");
     clearInterval(timerRef.current);
     timerRef.current = setInterval(handleNext, 3000);
   };
@@ -62,7 +64,7 @@ const Carousel = () => {
           }}
         />
       </div>
-      <div className="mt-3 flex space-x-1">
+      <div className="flex space-x-1">
         {imageUrls.map((_, index) => (
           <span
             key={index}

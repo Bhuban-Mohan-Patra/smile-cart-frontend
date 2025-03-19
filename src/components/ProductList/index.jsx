@@ -1,90 +1,75 @@
 import { useState } from "react";
 
-import Header from "components/commons/Header";
+import { Header, PageLoader } from "components/commons";
 import { useFetchProducts } from "hooks/reactQuery/useProductsApi";
 import useDebounce from "hooks/useDebounce";
 import { Search } from "neetoicons";
-import { Spinner, Input, NoData } from "neetoui";
-import { isEmpty, without } from "ramda";
+import { Pagination, Input, NoData } from "neetoui";
+import { isEmpty } from "ramda";
+import { useTranslation } from "react-i18next";
+import withTitle from "utils/withTitle";
 
+import { DEFAULT_PAGE_INDEX, DEFAULT_PAGE_SIZE } from "./constants";
 import ProductListItem from "./ProductListItem";
 
 const ProductList = () => {
-  // const [products, setProducts] = useState([]);
-  // const [isLoading, setIsLoading] = useState(true);
   const [searchKey, setSearchKey] = useState("");
-  const [cartItems, setCartItems] = useState([]);
+  const [currentPage, setCurrentPage] = useState(DEFAULT_PAGE_INDEX);
+
+  const { t } = useTranslation();
+
   const debouncedSearchKey = useDebounce(searchKey);
 
-  const { data: { products = [] } = {}, isLoading } = useFetchProducts({
+  const productsParams = {
     searchTerm: debouncedSearchKey,
-  });
-  // console.log(data);
+    page: currentPage,
+    pageSize: DEFAULT_PAGE_SIZE,
+  };
 
-  // const fetchProducts = async () => {
-  //   try {
-  //     const { products } = await productsApi.fetch({
-  //       searchTerm: debouncedSearchKey,
-  //     });
-  //     setProducts(products);
-  //   } catch (error) {
-  //     console.log("An error occurred:", error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   fetchProducts();
-  // }, [debouncedSearchKey]);
+  const { data: { products = [], totalProductsCount } = {}, isLoading } =
+    useFetchProducts(productsParams);
 
   if (isLoading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center">
-        <Spinner />
-      </div>
-    );
+    return <PageLoader />;
   }
-
-  const toggleIsInCart = slug =>
-    setCartItems(prevCartItems =>
-      prevCartItems.includes(slug)
-        ? without([slug], cartItems)
-        : [slug, ...cartItems]
-    );
 
   return (
     <div className="flex h-screen flex-col">
       <Header
-        cartItemsCount={cartItems.length}
         shouldShowBackButton={false}
-        title="Smile Cart"
+        title={t("title")}
         actionBlock={
           <Input
-            placeholder="Search"
+            placeholder={t("searchProducts")}
             prefix={<Search />}
             type="search"
             value={searchKey}
-            onChange={event => setSearchKey(event.target.value)}
+            onChange={event => {
+              setSearchKey(event.target.value);
+              setCurrentPage(DEFAULT_PAGE_INDEX);
+            }}
           />
         }
       />
       {isEmpty(products) || !debouncedSearchKey ? (
-        <NoData className="h-full w-full" title="No products to show" />
+        <NoData className="h-full w-full" title={t("noData")} />
       ) : (
         <div className="grid grid-cols-2 justify-items-center gap-y-8 p-4 md:grid-cols-3 lg:grid-cols-4">
           {products.map(product => (
-            <ProductListItem
-              key={product.slug}
-              {...product}
-              isInCart={cartItems.includes(product.slug)}
-              toggleIsInCart={() => toggleIsInCart(product.slug)}
-            />
+            <ProductListItem key={product.slug} {...product} />
           ))}
         </div>
       )}
+      <div className="mb-5 self-end">
+        <Pagination
+          count={totalProductsCount}
+          navigate={page => setCurrentPage(page)}
+          pageNo={currentPage || DEFAULT_PAGE_INDEX}
+          pageSize={DEFAULT_PAGE_SIZE}
+        />
+      </div>
     </div>
   );
 };
 
-export default ProductList;
+export default withTitle(ProductList);

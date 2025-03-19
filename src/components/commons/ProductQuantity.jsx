@@ -4,13 +4,19 @@ import { TooltipWrapper } from "components/commons";
 import { VALID_COUNT_REGEX } from "components/constants";
 import { useShowProduct } from "hooks/reactQuery/useProductsApi";
 import useSelectedQuantity from "hooks/useSelectedQuantity";
-import { Button, Input, Toastr } from "neetoui";
+import { Toastr, Input, Button } from "neetoui";
+import { useTranslation } from "react-i18next";
 
 const ProductQuantity = ({ slug }) => {
-  const countInputFocus = useRef(null);
-  const { data: product = {} } = useShowProduct(slug);
-  const { availableQuantity } = product;
+  const { t } = useTranslation();
+
   const { selectedQuantity, setSelectedQuantity } = useSelectedQuantity(slug);
+
+  const countInputFocus = useRef(null);
+
+  const { data: product = {} } = useShowProduct(slug);
+
+  const { availableQuantity } = product;
   const parsedSelectedQuantity = parseInt(selectedQuantity) || 0;
   const isNotValidQuantity = parsedSelectedQuantity >= availableQuantity;
 
@@ -19,9 +25,11 @@ const ProductQuantity = ({ slug }) => {
     const isNotValidInputQuantity = parseInt(value) > availableQuantity;
 
     if (isNotValidInputQuantity) {
-      Toastr.error(`Only ${availableQuantity} units are available`, {
-        autoClose: 2000,
+      const errorMessage = t("error.quantityLimit", {
+        count: availableQuantity,
       });
+
+      Toastr.error(errorMessage, { autoClose: 2000 });
       setSelectedQuantity(availableQuantity);
       countInputFocus.current.blur();
     } else if (VALID_COUNT_REGEX.test(value)) {
@@ -54,18 +62,8 @@ const ProductQuantity = ({ slug }) => {
         onChange={handleSetCount}
         onClick={preventNavigation}
       />
-      {/* <Button
-        className="focus-within:ring-0"
-        disabled={isNotValidQuantity}
-        label="+"
-        style="text"
-        onClick={e => {
-          preventNavigation(e);
-          setSelectedQuantity(selectedQuantity + 1);
-        }}
-      /> */}
       <TooltipWrapper
-        content="Reached maximum units"
+        content={t("reachedMaximumUnits")}
         position="top"
         showTooltip={isNotValidQuantity}
       >
